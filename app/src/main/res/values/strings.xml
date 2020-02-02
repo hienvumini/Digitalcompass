@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">DigitalCompass</string>
+    <string name="gmap_apikey">AIzaSyBBOrAxadJiOpxss-N9GNcUgFL-Y94Ufxk</string>
 </resources>
