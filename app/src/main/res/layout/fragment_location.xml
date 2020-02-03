@@ -35,6 +35,7 @@
         </LinearLayout>
 
         <TextView
+            android:id="@+id/textviewAddress_Location"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="30dp"
@@ -66,6 +67,7 @@
         </LinearLayout>
 
         <TextView
+            android:id="@+id/textviewLat_Location"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="30dp"
@@ -96,6 +98,7 @@
         </LinearLayout>
 
         <TextView
+            android:id="@+id/textviewLon_Location"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="30dp"
@@ -107,21 +110,33 @@
     </LinearLayout>
 
     <!-- TODO: Update blank fragment layout -->
+    <!--    <fragment-->
+    <!--        android:id="@+id/fragmentMap_Location"-->
+    <!--        android:name="com.google.android.gms.maps.MapFragment"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_above="@id/frameAds_Location"-->
+    <!--        android:layout_below="@id/ctheader_Location"-->
+    <!--        android:layout_margin="10dp" />-->
     <fragment
-        android:id="@+id/fragmentMap_Location"
-        android:name="com.google.android.gms.maps.MapFragment"
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/frameAds_Location"
         android:layout_below="@id/ctheader_Location"
-        android:layout_margin="10dp" />
+        tools:context="com.example.currentplacedetailsonmap.MapsActivityCurrentPlace" />
 
     <FrameLayout
+
         android:id="@+id/frameAds_Location"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="150dp"
         android:layout_alignParentBottom="true"
         android:layout_margin="10dp"
-        android:background="@color/mwhite"></FrameLayout>
+        android:background="@drawable/ads">
+
+    </FrameLayout>
+
 
 </RelativeLayout>

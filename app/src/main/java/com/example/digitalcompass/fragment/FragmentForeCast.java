@@ -1,5 +1,6 @@
 package com.example.digitalcompass.fragment;
 
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +20,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.digitalcompass.R;
 import com.example.digitalcompass.Utils.FormatDate;
+import com.example.digitalcompass.Utils.GlobalApplication;
 import com.example.digitalcompass.api.OpenWeatherAPI;
 
 import org.json.JSONArray;
@@ -29,6 +31,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
+import es.dmoral.toasty.Toasty;
+
 
 public class FragmentForeCast extends Fragment {
     ImageView imageViewReload;
@@ -36,6 +40,8 @@ public class FragmentForeCast extends Fragment {
             textViewWindDir, textViewHumidity, textViewPressure,
             textViewStatus, textViewVisibility;
     Calendar calendar;
+    GlobalApplication globalApplication;
+    Location location;
 
 
     @Override
@@ -44,12 +50,26 @@ public class FragmentForeCast extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_fore_cast, container, false);
         init(view);
+        getLocation();
         listener(view);
-        getForecast(21.028456, 105.805377);
+        getForecast(location.getLatitude(), location.getLongitude());
         return view;
     }
 
+    private void getLocation() {
+        if (globalApplication.location != null) {
+            location = globalApplication.location;
+
+
+        } else {
+            location.setLatitude(21.0291263);
+            location.setLongitude(105.8075145);
+
+        }
+    }
+
     private void getForecast(final double lattitude, final double longtitude) {
+        textViewUpdateTime.setVisibility(View.INVISIBLE);
 
         RequestQueue requestQueue = Volley.newRequestQueue(getActivity());
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST,
@@ -61,7 +81,7 @@ public class FragmentForeCast extends Fragment {
                         if (response != null) {
                             JSONObject jsonObject = new JSONObject();
                             JSONArray jsonArray = new JSONArray();
-                            String visibility = "";
+                            final String visibility = "";
                             try {
 
                                 jsonObject = response.getJSONObject("main");
@@ -87,8 +107,11 @@ public class FragmentForeCast extends Fragment {
                                 jsonArray = response.getJSONArray("weather");
                                 Log.d("11111", "onResponse: " + jsonArray.toString());
                                 textViewStatus.setText(jsonArray.getJSONObject(0).getString("main"));
-                                textViewUpdateTime.setText(FormatDate.formatDate(FormatDate.simpleformat1, calendar) + " Local Time");
+                                calendar = Calendar.getInstance();
 
+                                textViewUpdateTime.setVisibility(View.VISIBLE);
+                                textViewUpdateTime.setText(FormatDate.formatDate(FormatDate.simpleformat1, calendar) + " Local Time");
+                                Toasty.success(getActivity(), "Update Sucessfull").show();
 
 
                             } catch (JSONException e) {
@@ -125,7 +148,8 @@ public class FragmentForeCast extends Fragment {
         imageViewReload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getForecast(21.028456, 105.805377);
+                getLocation();
+                getForecast(location.getLatitude(), location.getLongitude());
 
             }
         });
@@ -144,6 +168,7 @@ public class FragmentForeCast extends Fragment {
         textViewVisibility = (TextView) view.findViewById(R.id.textviewVisibility_Forecast);
         textViewPressure = (TextView) view.findViewById(R.id.textviewPressure_Forecast);
         calendar = Calendar.getInstance();
+        globalApplication = (GlobalApplication) getActivity().getApplicationContext();
     }
 
 }

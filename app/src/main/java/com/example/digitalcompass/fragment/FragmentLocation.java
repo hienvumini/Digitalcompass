@@ -1,93 +1,231 @@
 package com.example.digitalcompass.fragment;
 
-import android.Manifest;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.Toast;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationManager;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Looper;
+import android.provider.Settings;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import com.example.digitalcompass.R;
+import com.example.digitalcompass.Utils.GlobalApplication;
+import com.example.digitalcompass.Utils.NumderUltils;
+import com.example.digitalcompass.view.AdsActivity;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Marker;
 
-import es.dmoral.toasty.Toasty;
+import java.util.List;
+import java.util.Locale;
 
 
-public class FragmentLocation extends Fragment {
-    ImageView imageViewcopyAddress, imageViewcopyLat, imageViewcopyLon;
+public class FragmentLocation extends Fragment implements OnMapReadyCallback,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        LocationListener {
 
 
-    @Override
+    TextView latTextView, lonTextView, AddressTextview;
+    GlobalApplication globalApplication;
+    GoogleMap mGoogleMap;
+    LocationRequest mLocationRequest;
+    GoogleApiClient mGoogleApiClient;
+    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
+    FrameLayout frameLayoutAds;
+
+
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_location, container, false);
-        initPermission();
+
+        SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+        supportMapFragment.getMapAsync(this);
         init(view);
-        listener();
+        Lister();
+
+
         return view;
     }
 
-
+    private void Lister() {
+        frameLayoutAds.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), AdsActivity.class);
+                startActivity(intent);
+            }
+        });
+    }
 
     private void init(View view) {
-        imageViewcopyAddress=(ImageView) view.findViewById(R.id.imageviewCopyAddress_Location);
-        imageViewcopyAddress.setColorFilter(getActivity().getResources().getColor(R.color.mbrow));
-        imageViewcopyLat=(ImageView) view.findViewById(R.id.imageviewCopyLat_Location);
-        imageViewcopyLat.setColorFilter(getActivity().getResources().getColor(R.color.mbrow));
-        imageViewcopyLon=(ImageView) view.findViewById(R.id.imageviewCopyLon_Location);
-        imageViewcopyLon.setColorFilter(getActivity().getResources().getColor(R.color.mbrow));
-    }
-    private void listener() {
+        latTextView = view.findViewById(R.id.textviewLat_Location);
+        lonTextView = view.findViewById(R.id.textviewLon_Location);
+        AddressTextview = view.findViewById(R.id.textviewAddress_Location);
 
-        imageViewcopyAddress.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toasty.normal(getActivity(),"Has copied the Address to the clipboard").show();
-
-            }
-        });
-        imageViewcopyLat.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toasty.normal(getActivity(),"Has copied the Latitude to the clipboard").show();
-
-            }
-        });
-        imageViewcopyLon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toasty.normal(getActivity(),"Has copied the Lontitude to the clipboard").show();
-
-            }
-        });
+        globalApplication = (GlobalApplication) getActivity().getApplicationContext();
+        frameLayoutAds = (FrameLayout) view.findViewById(R.id.frameAds_Location);
     }
 
-    public void initPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (getActivity().checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-                //Permisson don't granted
-                if (shouldShowRequestPermissionRationale(
-                        Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    Toast.makeText(getActivity(), "Permission isn't granted ", Toast.LENGTH_SHORT).show();
-                }
-                // Permisson don't granted and dont show dialog again.
-                else {
-                    Toast.makeText(getActivity(), "Permisson don't granted and dont show dialog again ", Toast.LENGTH_SHORT).show();
-                }
-                //Register permission
-                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(1000);
+        mLocationRequest.setFastestInterval(1000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        if (ContextCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        }
+    }
 
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mGoogleMap = googleMap;
+        mGoogleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+
+        //Initialize Google Play Services
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(getActivity(),
+                    Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+                //Location Permission already granted
+                buildGoogleApiClient();
+                mGoogleMap.setMyLocationEnabled(true);
+            } else {
+                //Request Location Permission
+                checkLocationPermission();
+            }
+        } else {
+            buildGoogleApiClient();
+            mGoogleMap.setMyLocationEnabled(false);
+
+        }
+
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        latTextView.setText(NumderUltils.getFormattedLattitudeInDegree(location.getLatitude()));
+        lonTextView.setText(NumderUltils.getFormattedLongtitudeInDegree(location.getLongitude()));
+        AddressTextview.setText(getCompleteAddressString(location.getLatitude(), location.getLongitude()));
+
+
+    }
+
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        mGoogleApiClient.connect();
+    }
+
+    private void checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+                new AlertDialog.Builder(getActivity())
+                        .setTitle("Location Permission Needed")
+                        .setMessage("This app needs the Location permission, please accept to use location functionality")
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                //Prompt the user once explanation has been shown
+                                ActivityCompat.requestPermissions(getActivity(),
+                                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                        MY_PERMISSIONS_REQUEST_LOCATION);
+                            }
+                        })
+                        .create()
+                        .show();
+
+
+            } else {
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(getActivity(),
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        MY_PERMISSIONS_REQUEST_LOCATION);
             }
         }
     }
+
+    private String getCompleteAddressString(double LATITUDE, double LONGITUDE) {
+        String strAdd = "";
+        Geocoder geocoder = new Geocoder(getActivity(), Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(LATITUDE, LONGITUDE, 1);
+            if (addresses != null) {
+                Address returnedAddress = addresses.get(0);
+                StringBuilder strReturnedAddress = new StringBuilder("");
+
+                for (int i = 0; i <= returnedAddress.getMaxAddressLineIndex(); i++) {
+                    strReturnedAddress.append(returnedAddress.getAddressLine(i)).append("\n");
+                }
+                strAdd = strReturnedAddress.toString();
+
+            } else {
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+        return strAdd;
+    }
 }
+
+
+
+
+
