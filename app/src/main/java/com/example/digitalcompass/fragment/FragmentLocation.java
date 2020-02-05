@@ -32,6 +32,7 @@ import android.widget.Toast;
 
 import com.example.digitalcompass.R;
 import com.example.digitalcompass.Utils.GlobalApplication;
+import com.example.digitalcompass.Utils.MapUtils;
 import com.example.digitalcompass.Utils.NumderUltils;
 import com.example.digitalcompass.view.AdsActivity;
 import com.google.android.gms.common.ConnectionResult;
@@ -124,7 +125,7 @@ public class FragmentLocation extends Fragment implements OnMapReadyCallback,
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mGoogleMap = googleMap;
-        mGoogleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+        mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
         //Initialize Google Play Services
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -150,7 +151,7 @@ public class FragmentLocation extends Fragment implements OnMapReadyCallback,
     public void onLocationChanged(Location location) {
         latTextView.setText(NumderUltils.getFormattedLattitudeInDegree(location.getLatitude()));
         lonTextView.setText(NumderUltils.getFormattedLongtitudeInDegree(location.getLongitude()));
-        AddressTextview.setText(getCompleteAddressString(location.getLatitude(), location.getLongitude()));
+        AddressTextview.setText(MapUtils.getCompleteAddressString(getActivity(),location.getLatitude(), location.getLongitude()));
 
 
     }
@@ -200,29 +201,7 @@ public class FragmentLocation extends Fragment implements OnMapReadyCallback,
         }
     }
 
-    private String getCompleteAddressString(double LATITUDE, double LONGITUDE) {
-        String strAdd = "";
-        Geocoder geocoder = new Geocoder(getActivity(), Locale.getDefault());
-        try {
-            List<Address> addresses = geocoder.getFromLocation(LATITUDE, LONGITUDE, 1);
-            if (addresses != null) {
-                Address returnedAddress = addresses.get(0);
-                StringBuilder strReturnedAddress = new StringBuilder("");
 
-                for (int i = 0; i <= returnedAddress.getMaxAddressLineIndex(); i++) {
-                    strReturnedAddress.append(returnedAddress.getAddressLine(i)).append("\n");
-                }
-                strAdd = strReturnedAddress.toString();
-
-            } else {
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-
-        }
-        return strAdd;
-    }
 }
 
 

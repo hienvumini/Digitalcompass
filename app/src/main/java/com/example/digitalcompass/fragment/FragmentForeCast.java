@@ -135,7 +135,7 @@ public class FragmentForeCast extends Fragment {
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<String, String>();
                 params.put("lat", lattitude + "");
-                params.put("lon", longtitude + "");
+                params.put("string_lon", longtitude + "");
 
                 return params;
             }

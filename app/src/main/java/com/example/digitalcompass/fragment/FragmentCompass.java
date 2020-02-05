@@ -12,17 +12,21 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
 import com.example.digitalcompass.R;
 import com.example.digitalcompass.R;
+import com.example.digitalcompass.Utils.NumderUltils;
 
 
 public class FragmentCompass extends Fragment implements SensorEventListener {
-    TextView textViewHienthi, textViewmgnetic;
-    ImageView imageViewCompass, imageViewLocation, imageViewAngle;
+    TextView textViewHienthi, textViewmgnetic, textViewDirection;
+    ImageView imageViewCompass, imageViewLocation, imageViewAngle, imageViewDirection;
     ImageView imageViewInfo;
     SensorManager sensorManager;
     SensorEventListener registerListener;
@@ -30,11 +34,14 @@ public class FragmentCompass extends Fragment implements SensorEventListener {
     Sensor sensorMagtic;
     Sensor sensorGyroscope;
     private float currentDegree = 0f;
-    private final static float NS2S = 1.0f / 1000000000.0f;
-    private final float[] deltaRotationVector = new float[4];
+    private float currentDirection = 0f;
     float[] mGravity;
     float[] mGeomagnetic;
-    String string_degree="";
+     SeekBar seekBarAngle;
+    boolean isseekbar = false;
+    LinearLayout linearLayoutDirection;
+    int degree_directtion=0;
+
 
 
     @Override
@@ -45,14 +52,66 @@ public class FragmentCompass extends Fragment implements SensorEventListener {
 
         init(view);
         initSensor();
+        listener();
         return view;
+
+    }
+
+    private void listener() {
+        imageViewAngle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isseekbar = !isseekbar;
+                if (isseekbar) {
+
+                    seekBarAngle.setVisibility(View.VISIBLE);
+                    imageViewDirection.setVisibility(View.VISIBLE);
+                    linearLayoutDirection.setVisibility(View.VISIBLE);
+
+
+                } else {
+                    seekBarAngle.setVisibility(View.INVISIBLE);
+                    imageViewDirection.setVisibility(View.INVISIBLE);
+                    linearLayoutDirection.setVisibility(View.INVISIBLE);
+                    
+
+
+                }
+            }
+        });
+        seekBarAngle.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                 degree_directtion = (progress * 360) / 100;
+                textViewDirection.setText(degree_directtion + "");
+                textViewDirection.setText(degree_directtion+"°"+NumderUltils.getsymbolDirection(degree_directtion));
+
+                RotateAnimation rd = new RotateAnimation(currentDirection, degree_directtion, Animation.RELATIVE_TO_SELF, 0.5f,
+                        Animation.RELATIVE_TO_SELF, 0.5f);
+                rd.setFillAfter(true);
+                rd.setDuration(210);
+                currentDirection = -degree_directtion;
+                imageViewDirection.setAnimation(rd);
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
 
     }
 
     private void initSensor() {
         sensorMagtic = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         sensorAcclerometor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        sensorGyroscope=sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        sensorGyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
     }
 
     @Override
@@ -60,10 +119,10 @@ public class FragmentCompass extends Fragment implements SensorEventListener {
         super.onResume();
 
         sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor
-                .TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST);
+                .TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_GAME);
         sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor
-                .TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_FASTEST);
-        sensorManager.registerListener(this,sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE),SensorManager.SENSOR_DELAY_FASTEST);
+                .TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_GAME);
+        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_GAME);
 
 
     }
@@ -84,9 +143,13 @@ public class FragmentCompass extends Fragment implements SensorEventListener {
         imageViewLocation.setColorFilter(view.getContext().getResources().getColor(R.color.mwhite));
         imageViewCompass = (ImageView) view.findViewById(R.id.ImageviewCompass_Compasss);
         imageViewCompass.setColorFilter(view.getContext().getResources().getColor(R.color.mwhite));
+        imageViewDirection = (ImageView) view.findViewById(R.id.imageviewDirection);
         sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
         textViewHienthi = (TextView) view.findViewById(R.id.textviewHienthi);
         textViewmgnetic = (TextView) view.findViewById(R.id.textviewmgnetic_Compass);
+        textViewDirection = (TextView) view.findViewById(R.id.textviewDiriection_Compass);
+        seekBarAngle = (SeekBar) view.findViewById(R.id.seekbarAngle);
+        linearLayoutDirection = (LinearLayout) view.findViewById(R.id.linenerDirection_Compass);
 
 
     }
@@ -110,7 +173,7 @@ public class FragmentCompass extends Fragment implements SensorEventListener {
 
 
         }
-        if (event.sensor.getType()==Sensor.TYPE_GYROSCOPE){
+        if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
 
 
         }
@@ -127,50 +190,26 @@ public class FragmentCompass extends Fragment implements SensorEventListener {
                 float azimut = orientation[0];
 
                 float rotation = Math.round(-azimut * 360 / (2 * 3.14159f));
-                float degree = Math.round((float)(Math.toDegrees(azimut)+360)%360);
+                float degree = Math.round((float) (Math.toDegrees(azimut) + 360) % 360);
+                textViewHienthi.setText(degree + "°" + NumderUltils.getsymbolDirection(degree));
 
-                if (degree>=0 && degree<22.5 || degree>=337.5){
-
-                    string_degree=degree+"°N";
-                } else if (degree>=22.5 && degree<67.5){
-
-                    string_degree=degree+"°NW";
-                }
-                else if (degree>=67.5 && degree<112.5){
-
-                    string_degree=degree+"°W";
-                }
-                else if (degree>=122.5 && degree<157.5){
-
-                    string_degree=degree+"°SW";
-                }
-                else if (degree>=157.5 && degree<202.5){
-
-                    string_degree=degree+"°S";
-                }
-                else if (degree>=202.5 && degree<247.5){
-
-                    string_degree=degree+"°SE";
-                }
-                else if (degree>=247.5 && degree<292.5){
-
-                    string_degree=degree+"°E";
-                }
-                else if (degree>=292.5 && degree<337.5){
-
-                    string_degree=degree+"°NE";
-                }
-
-
-
-                        textViewHienthi.setText(string_degree);
-
-                RotateAnimation ra=new RotateAnimation(currentDegree,degree,Animation.RELATIVE_TO_SELF, 0.5f,
+                RotateAnimation ra = new RotateAnimation(currentDegree, degree, Animation.RELATIVE_TO_SELF, 0.5f,
                         Animation.RELATIVE_TO_SELF, 0.5f);
                 ra.setFillAfter(true);
                 ra.setDuration(210);
                 currentDegree = -degree;
                 imageViewCompass.setAnimation(ra);
+                if (isseekbar) {
+
+                    RotateAnimation rd2 = new RotateAnimation(currentDirection, degree, Animation.RELATIVE_TO_SELF, 0.5f,
+                            Animation.RELATIVE_TO_SELF, 0.5f);
+                    ra.setFillAfter(true);
+                    ra.setDuration(210);
+                    currentDirection = -degree;
+                    imageViewDirection.setAnimation(rd2);
+
+
+                }
 
 
             }
@@ -178,11 +217,11 @@ public class FragmentCompass extends Fragment implements SensorEventListener {
         }
 
 
-
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
 
     }
 }

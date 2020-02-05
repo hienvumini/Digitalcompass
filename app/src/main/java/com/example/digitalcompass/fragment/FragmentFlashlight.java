@@ -1,10 +1,13 @@
 package com.example.digitalcompass.fragment;
 
 import android.content.Context;
+import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,11 +23,17 @@ import androidx.fragment.app.Fragment;
 import com.example.digitalcompass.R;
 import com.example.digitalcompass.R;
 
+import java.security.Policy;
+
+@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class FragmentFlashlight extends Fragment {
     LinearLayout linearLayoutSOS;
     Switch aSwitchLight;
     ImageView imageViewLight, imageViewFlash_on, imageView_Flash_off;
     CameraManager cameraManager;
+    boolean isSOS = false;
+    boolean isturnlight = false;
+    CountDownTimer countDownTimer;
 
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -40,9 +49,16 @@ public class FragmentFlashlight extends Fragment {
 
     private void listener() {
         linearLayoutSOS.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
             public void onClick(View v) {
-                Toast.makeText(getActivity(), "SOS", Toast.LENGTH_SHORT).show();
+                isSOS = !isSOS;
+
+                try {
+                    setStatusSOS();
+                } catch (CameraAccessException e) {
+                    e.printStackTrace();
+                }
 
 
             }
@@ -63,7 +79,7 @@ public class FragmentFlashlight extends Fragment {
         imageViewLight = (ImageView) view.findViewById(R.id.light);
         imageViewFlash_on = (ImageView) view.findViewById(R.id.flash_on_Flashlight);
         imageView_Flash_off = (ImageView) view.findViewById(R.id.flash_off_Flashlight);
-        cameraManager=(CameraManager) getActivity().getSystemService(Context.CAMERA_SERVICE);
+        cameraManager = (CameraManager) getActivity().getSystemService(Context.CAMERA_SERVICE);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -81,13 +97,69 @@ public class FragmentFlashlight extends Fragment {
             imageViewFlash_on.setVisibility(View.INVISIBLE);
         }
         try {
-            if (cameraManager.getCameraIdList().length>0){
-                cameraManager.setTorchMode(cameraManager.getCameraIdList()[0],isTurnOn);
+            if (cameraManager.getCameraIdList().length > 0) {
+                cameraManager.setTorchMode(cameraManager.getCameraIdList()[0], isTurnOn);
 
             }
         } catch (CameraAccessException e) {
             e.printStackTrace();
-        } catch (Exception e){}
+        }
+        catch (Exception e) {
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public void setStatusSOS() throws CameraAccessException {
+        if (isSOS) {
+            Toast.makeText(getActivity(), "SOS ON", Toast.LENGTH_SHORT).show();
+            linearLayoutSOS.setBackground(getActivity().getResources().getDrawable(R.drawable.botronsospress));
+            turnSOSFlashLight(isSOS);
+
+
+        } else {
+            Toast.makeText(getActivity(), "SOS OFF", Toast.LENGTH_SHORT).show();
+            linearLayoutSOS.setBackground(getActivity().getResources().getDrawable(R.drawable.botron));
+            turnSOSFlashLight(isSOS);
+
+        }
+
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public void turnSOSFlashLight(boolean statusSOS) throws CameraAccessException {
+
+     if (countDownTimer==null){
+         countDownTimer = new CountDownTimer(5000, 500) {
+             @RequiresApi(api = Build.VERSION_CODES.M)
+             @Override
+             public void onTick(long millisUntilFinished) {
+                 switchLight(isturnlight);
+                 isturnlight = !isturnlight;
+             }
+
+             @Override
+             public void onFinish() {
+                 switchLight(false);
+                 this.start();
+             }
+         };
+
+     }
+
+        if (statusSOS) {
+
+            countDownTimer.start();
+            Log.d("111113", "turnSOSFlashLight: Mo " + statusSOS);
+        } else {
+
+            countDownTimer.cancel();
+            switchLight(false);
+
+            Log.d("111113", "turnSOSFlashLight: Tat " + statusSOS);
+
+        }
+
+
     }
 
 
