@@ -125,7 +125,7 @@
         android:layout_height="wrap_content"
         android:layout_above="@id/frameAds_Location"
         android:layout_below="@id/ctheader_Location"
-        tools:context="com.example.currentplacedetailsonmap.MapsActivityCurrentPlace" />
+        tools:context="com.nextsol.currentplacedetailsonmap.MapsActivityCurrentPlace" />
 
     <FrameLayout
 

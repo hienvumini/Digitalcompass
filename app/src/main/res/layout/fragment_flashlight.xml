@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/mblack"
     tools:context=".fragment.FragmentFlashlight">
 
@@ -46,10 +47,13 @@
 
             <Switch
                 android:id="@+id/switch_Flashlight"
-                android:layout_width="60dp"
-                android:layout_height="120dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:rotation="-90" />
+                android:rotation="-90"
+                android:track="@drawable/track_selector"
+                android:thumb="@drawable/thumb_selector"
+                />
 
         </RelativeLayout>
 
