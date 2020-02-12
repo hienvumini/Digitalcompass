@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -32,10 +33,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.nextsol.digitalcompass.R;
 import com.nextsol.digitalcompass.Utils.FragmentUtils;
+
 import com.nextsol.digitalcompass.fragment.FragmentCompass;
 import com.nextsol.digitalcompass.fragment.FragmentFlashlight;
 import com.nextsol.digitalcompass.fragment.FragmentForeCast;
-import com.nextsol.digitalcompass.fragment.FragmentLocation;
 import com.nextsol.digitalcompass.fragment.FragmentMaps;
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
@@ -43,12 +44,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     FragmentCompass fragmentCompass;
     FragmentFlashlight fragmentFlashlight;
     FragmentForeCast fragmentForeCast;
-    FragmentLocation fragmentLocation;
     FragmentMaps fragmentMaps;
 
     int PERMISSION_ID = 44;
     FusedLocationProviderClient mFusedLocationClient;
     GlobalApplication globalApplication;
+    public static Location mylocation;
 
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -57,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         init();
-        FragmentUtils.openFragment(fragmentCompass, getSupportFragmentManager(), R.id.framelayoutFragment);
+        FragmentUtils.openFragment(fragmentForeCast, getSupportFragmentManager(), R.id.framelayoutFragment);
         listener();
         getLastLocation();
     }
@@ -77,14 +78,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                     case R.id.menu_nav_forecast:
                         fragmentselect = fragmentForeCast;
                         break;
-                    case R.id.menu_nav_location:
-                        fragmentselect = fragmentLocation;
-                        break;
                     case R.id.menu_nav_flashlight:
                         fragmentselect = fragmentFlashlight;
                         break;
                     default:
-                        fragmentselect = fragmentCompass;
+                        fragmentselect = fragmentForeCast;
 
                         break;
                 }
@@ -103,10 +101,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         fragmentCompass = new FragmentCompass();
         fragmentFlashlight = new FragmentFlashlight();
         fragmentForeCast = new FragmentForeCast();
-        fragmentLocation = new FragmentLocation();
+
         fragmentMaps = new FragmentMaps();
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         globalApplication = (GlobalApplication) getApplicationContext();
+
 
     }
 
@@ -122,9 +121,17 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                                 if (location == null) {
                                     Toast.makeText(MainActivity.this, "Location: Null", Toast.LENGTH_SHORT).show();
                                     requestNewLocationData();
+
                                 } else {
-                                    Toast.makeText(MainActivity.this, location.getLatitude() + "--" + location.getLongitude(), Toast.LENGTH_SHORT).show();
+
                                     globalApplication.location = location;
+                                    mylocation = location;
+                                    SharedPreferences sharedPreferences = getSharedPreferences("location", Context.MODE_PRIVATE);
+                                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                                    editor.putFloat("lat", (float) location.getLatitude());
+                                    editor.putFloat("lon", (float) location.getLongitude());
+                                    editor.apply();
+
                                 }
                             }
                         }
@@ -211,5 +218,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     @Override
     public void onLocationChanged(Location location) {
         getLastLocation();
+
     }
+
+
 }

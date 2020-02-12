@@ -166,6 +166,7 @@
         android:orientation="vertical">
 
         <TextView
+            android:layout_marginTop="10dp"
             android:id="@+id/textviewlocation_Maps"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -2,7 +2,10 @@
 <resources>
     <color name="mblack">#000000</color>
     <color name="mwhite">#FFFFFF</color>
+    <color name="mtext1">#FFFFFF</color>
     <color name="mgreen">#30F00B</color>
     <color name="mbrow">#6D6F6D</color>
     <color name="mred">#F50415</color>
+    <color name="mblue">#0AC5E6</color>
+
 </resources>

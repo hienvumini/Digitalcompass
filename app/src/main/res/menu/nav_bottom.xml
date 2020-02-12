@@ -12,10 +12,7 @@
         android:id="@+id/menu_nav_forecast"
         android:icon="@drawable/forcecast"
         android:title="Forecast"></item>
-    <item
-        android:id="@+id/menu_nav_location"
-        android:icon="@drawable/location"
-        android:title="Location"></item>
+
     <item
         android:id="@+id/menu_nav_flashlight"
         android:icon="@drawable/flashlight"

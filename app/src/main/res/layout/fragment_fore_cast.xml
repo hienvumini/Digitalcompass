@@ -3,7 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/mblack"
+    android:background="@drawable/background"
+
     tools:context=".fragment.FragmentForeCast">
 
     <ScrollView
@@ -41,7 +42,7 @@
                         android:id="@+id/textviewCity_Forecast"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
+                        android:layout_marginTop="40dp"
 
                         android:text="Local Name"
                         android:textColor="@color/mwhite"
@@ -59,15 +60,77 @@
                         android:textColor="@color/mwhite"
                         android:textSize="15sp" />
 
-                    <TextView
-                        android:id="@+id/textviewDegree_Forecast"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
-                        android:text="00°c"
-                        android:textColor="@color/mwhite"
-                        android:textSize="60sp"
-                        android:textStyle="bold" />
+                        android:orientation="horizontal"
+                        android:weightSum="2">
+
+                        <RelativeLayout
+                            android:layout_width="0dp"
+
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/textviewDegree_Forecast"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:text="00°C"
+                                android:textColor="@color/mwhite"
+                                android:textSize="60sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/textviewFeelslike_Forecast"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentBottom="true"
+                                android:layout_centerHorizontal="true"
+                                android:layout_marginBottom="15dp"
+                                android:text="Feels like 23"
+                                android:textColor="@color/mwhite" />
+
+                            <TextView
+                                android:id="@+id/textviewMinmaxTemp_ForeCast"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_above="@id/textviewDegree_Forecast"
+                                android:layout_centerHorizontal="true"
+                                android:layout_marginTop="15dp"
+                                android:text="Day 23 - Night 19"
+                                android:textColor="@color/mwhite" />
+
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1">
+
+                            <ImageView
+                                android:layout_centerInParent="true"
+                                android:id="@+id/imageviewIcon_ForeCast"
+                                android:layout_width="120dp"
+                                android:layout_height="120dp"
+                                android:scaleType="fitXY"
+                                android:src="@drawable/i01d" />
+
+                            <TextView
+                                android:id="@+id/textviewStatus_Forecast"
+                                android:textSize="20sp"
+                                android:textColor="@color/mwhite"
+                                android:layout_centerHorizontal="true"
+                                android:text="Status"
+                                android:layout_below="@id/imageviewIcon_ForeCast"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                 />
+                        </RelativeLayout>
+
+                    </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -87,7 +150,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Wind: "
-                                android:textColor="@color/mbrow"
+                                android:textColor="@color/mwhite"
                                 android:textSize="20dp" />
 
                             <TextView
@@ -109,7 +172,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Dir: "
-                                android:textColor="@color/mbrow"
+                                android:textColor="@color/mwhite"
                                 android:textSize="20dp" />
 
                             <TextView
@@ -132,7 +195,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Humidity: "
-                            android:textColor="@color/mbrow"
+                            android:textColor="@color/mwhite"
                             android:textSize="20dp" />
 
                         <TextView
@@ -154,7 +217,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Pressure: "
-                            android:textColor="@color/mbrow"
+                            android:textColor="@color/mwhite"
                             android:textSize="20dp" />
 
                         <TextView
@@ -166,27 +229,7 @@
                             android:textSize="20dp" />
                     </LinearLayout>
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="State of the barometric pressure: "
-                            android:textColor="@color/mbrow"
-                            android:textSize="20dp" />
-
-                        <TextView
-                            android:id="@+id/textviewStatus_Forecast"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:text="null"
-                            android:textColor="@color/mwhite"
-                            android:textSize="20dp" />
-                    </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -198,7 +241,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Visibility: "
-                            android:textColor="@color/mbrow"
+                            android:textColor="@color/mwhite"
                             android:textSize="20dp" />
 
                         <TextView
@@ -215,7 +258,9 @@
 
             </RelativeLayout>
 
+
             <androidx.recyclerview.widget.RecyclerView
+
                 android:id="@+id/recycleviewDays_ForeCast"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />

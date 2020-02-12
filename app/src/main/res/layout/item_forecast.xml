@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="wrap_content"
+
+    android:alpha="0.9"
+    android:orientation="vertical"
+
+
+    >
 
     <LinearLayout
+        android:id="@+id/lineershort_ItemForeCast"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
@@ -25,11 +31,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Today"
-                android:textColor="@color/mblack"
+                android:textColor="@color/mtext1"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
             <TextView
+                android:textColor="@color/mtext1"
                 android:id="@+id/textviewStatus_ItermForeCast"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -53,6 +60,7 @@
                 android:src="@drawable/i01d" />
 
             <TextView
+                android:textColor="@color/mtext1"
                 android:id="@+id/textviewTemp_ItermForeCast"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -66,10 +74,11 @@
 
     <LinearLayout
         android:id="@+id/linelerDetail_ItemrForeCast"
-        android:layout_marginLeft="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
         android:orientation="horizontal"
+        android:visibility="gone"
         android:weightSum="10">
 
         <LinearLayout
@@ -79,20 +88,25 @@
             android:orientation="vertical">
 
             <TextView
-                android:textSize="18sp"
+                android:textColor="@color/mtext1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="Wind"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:textSize="18sp" />
+
             <TextView
-                android:textSize="18sp"
+                android:textColor="@color/mtext1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="Humidity"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:textSize="18sp" />
+
             <TextView
-                android:textSize="18sp"
-                android:text="Pressure"
+                android:textColor="@color/mtext1"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:text="Pressure"
+                android:textSize="18sp" />
 
         </LinearLayout>
 
@@ -101,24 +115,35 @@
             android:layout_height="wrap_content"
             android:layout_weight="6"
             android:orientation="vertical">
+
             <TextView
+                android:textColor="@color/mtext1"
                 android:id="@+id/textviewWind_ItermForeCast"
-                android:textSize="18sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="Wind"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:textSize="18sp" />
+
             <TextView
+                android:textColor="@color/mtext1"
                 android:id="@+id/textviewHumidity_ItermForeCast"
-                android:textSize="18sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="Humidity"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:textSize="18sp" />
+
             <TextView
+                android:textColor="@color/mtext1"
                 android:id="@+id/textviewPressure_ItermForeCast"
-                android:textSize="18sp"
-                android:text="Pressure"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:text="Pressure"
+                android:textSize="18sp" />
         </LinearLayout>
     </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.1dp"
+        android:background="@color/mbrow" />
 </LinearLayout>

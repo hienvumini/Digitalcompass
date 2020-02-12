@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">DigitalCompass</string>
     <string name="gmap_apikey">AIzaSyBBOrAxadJiOpxss-N9GNcUgFL-Y94Ufxk</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 
 </resources>

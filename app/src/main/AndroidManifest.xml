@@ -16,7 +16,7 @@
         android:required="true" />
 
     <application
-        android:name="com.nextsol.digitalcompass.Utils.GlobalApplication"
+        android:name=".Utils.GlobalApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -24,7 +24,17 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name="com.nextsol.digitalcompass.view.AdsActivity" />
+        <receiver android:name=".view.ForecastWidget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/forecast_widget_info" />
+        </receiver>
+
+        <activity android:name=".view.AdsActivity" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -33,13 +43,14 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <activity android:name="com.nextsol.digitalcompass.view.MainActivity">
+        <activity android:name=".view.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service android:name=".Utils.LocationService"/>
     </application>
 
 </manifest>
