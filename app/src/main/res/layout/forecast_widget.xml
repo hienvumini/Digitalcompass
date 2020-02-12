@@ -2,7 +2,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@drawable/backgroundwidget"
-    android:padding="@dimen/widget_margin"
+
     android:paddingLeft="10dp">
 
 
@@ -46,7 +46,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_centerHorizontal="true"
-            android:paddingLeft="10dp">
+            >
 
             <TextView
                 android:id="@+id/textvieewTemp_Widget"
@@ -65,7 +65,7 @@
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:layout_centerHorizontal="true"
-            android:layout_marginLeft="20dp"
+          android:layout_marginRight="10dp"
             android:gravity="center"
             android:orientation="vertical">
 

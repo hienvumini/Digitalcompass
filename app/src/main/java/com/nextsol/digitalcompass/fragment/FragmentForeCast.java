@@ -23,6 +23,7 @@ import com.android.volley.toolbox.Volley;
 import com.nextsol.digitalcompass.R;
 import com.nextsol.digitalcompass.Utils.FormatDate;
 import com.nextsol.digitalcompass.Utils.GlobalApplication;
+import com.nextsol.digitalcompass.Utils.NetWorkUltils;
 import com.nextsol.digitalcompass.Utils.NumderUltils;
 import com.nextsol.digitalcompass.adapter.ForeCastAdapter;
 import com.nextsol.digitalcompass.api.OpenWeatherAPI;
@@ -38,6 +39,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
+import es.dmoral.toasty.Toasty;
+
 public class FragmentForeCast extends Fragment {
     ImageView imageViewReload, imageViewIcon;
     TextView textViewCity, textViewUpdateTime, textViewDegree, textViewWindSpeed,
@@ -51,18 +54,16 @@ public class FragmentForeCast extends Fragment {
     ArrayList<Forecast> listForeCastDays;
     ForeCastAdapter foreCastAdapter;
     Map<String, Integer> map;
+    View view;
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_fore_cast, container, false);
+        view = inflater.inflate(R.layout.fragment_fore_cast, container, false);
         init(view);
-        getLocation();
         listener(view);
-        getForecast(location.getLatitude(), location.getLongitude());
-        getGeoCast5Days(location.getLatitude(), location.getLongitude());
         return view;
     }
 
@@ -83,7 +84,7 @@ public class FragmentForeCast extends Fragment {
         textViewUpdateTime.setVisibility(View.INVISIBLE);
 
         RequestQueue requestQueue = Volley.newRequestQueue(getActivity());
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST,
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET,
                 OpenWeatherAPI.getPathAsGeo(lattitude, longtitude, 1), null,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -110,7 +111,8 @@ public class FragmentForeCast extends Fragment {
                                 forecast.setSpeedWind(jsonObject.getDouble("speed"));
                                 try {
                                     forecast.setDirWind(jsonObject.getDouble("deg"));
-                                } catch (Exception e){}
+                                } catch (Exception e) {
+                                }
                                 forecast.setTimeStamp(response.getLong("dt"));
                                 forecast.setCity(response.getString("name"));
                                 if (response.getString("visibility").length() == 0 || response.getString("visibility") == null) {
@@ -180,7 +182,7 @@ public class FragmentForeCast extends Fragment {
 
 
         RequestQueue requestQueue = Volley.newRequestQueue(getActivity());
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, OpenWeatherAPI.getPathAsGeo5Days(lattitude, longtitude, 1), null, new Response.Listener<JSONObject>() {
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, OpenWeatherAPI.getPathAsGeo5Days(lattitude, longtitude, 1), null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 Log.d("11111", "onResponse: 5 ngay " + response.toString());
@@ -204,16 +206,10 @@ public class FragmentForeCast extends Fragment {
                                 forecast.setIcon(map.get(jsonObject.getJSONArray("weather").getJSONObject(0).getString("icon")));
                                 forecast.setSpeedWind(jsonObject.getJSONObject("wind").getDouble("speed"));
                                 forecast.setDirWind(jsonObject.getJSONObject("wind").getDouble("deg"));
-//                                Log.d("2222", "onResponse: "+forecast.getIcon()+"--"+i);
                                 listForecast3Hour.add(forecast);
                                 if (i % 8 == 0) {
                                     listForeCastDays.add(forecast);
-
                                 }
-
-//                                Log.d("2222", "onResponse: "+jsonObject.getJSONArray("weather")
-//                                        .getJSONObject(0).getString("main")+"\n");
-
                             }
                             foreCastAdapter = new ForeCastAdapter(getActivity(), R.id.recycleviewDays_ForeCast, listForeCastDays);
                             recyclerViewDays.setAdapter(foreCastAdapter);
@@ -291,9 +287,39 @@ public class FragmentForeCast extends Fragment {
 
     public void setDataMap() {
 
-        IconForeCast iconForeCast=new IconForeCast();
-        map=iconForeCast.getMapicon();
+        IconForeCast iconForeCast = new IconForeCast();
+        map = iconForeCast.getMapicon();
 
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (NetWorkUltils.isNetworkConnected(getActivity())) {
+            init(view);
+            getLocation();
+            listener(view);
+            getForecast(location.getLatitude(), location.getLongitude());
+            getGeoCast5Days(location.getLatitude(), location.getLongitude());
+
+        } else {
+
+            Toasty.error(getActivity(), "Internet was interup,\n Please check Wifi/Mobile Network").show();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+    }
 }

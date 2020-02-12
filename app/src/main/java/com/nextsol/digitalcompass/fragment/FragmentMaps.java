@@ -2,20 +2,18 @@ package com.nextsol.digitalcompass.fragment;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -43,6 +41,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.nextsol.digitalcompass.Utils.SOTWFormatter;
+import com.nextsol.digitalcompass.model.Compass;
 
 import java.util.ArrayList;
 
@@ -50,7 +50,7 @@ import java.util.ArrayList;
 public class FragmentMaps extends Fragment implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        LocationListener, View.OnClickListener, SensorEventListener {
+        LocationListener, View.OnClickListener {
     FrameLayout frameLayoutMaps;
     GoogleMap map;
     LatLng center;
@@ -69,15 +69,16 @@ public class FragmentMaps extends Fragment implements OnMapReadyCallback,
     GlobalApplication globalApplication;
     Location location;
     HorizontalWheelView horizontalWheelView;
-    SensorManager sensorManager;
-    Sensor sensorAcclerometor;
-    Sensor sensorMagtic;
+
     float[] mGravity;
     float[] mGeomagnetic;
     LocationRequest mLocationRequest;
     GoogleApiClient mGoogleApiClient;
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
+    private Compass compass;
 
+    private float currentAzimuth;
+    private SOTWFormatter sotwFormatter;
 
 
     @Override
@@ -109,6 +110,7 @@ public class FragmentMaps extends Fragment implements OnMapReadyCallback,
         textViewLat = (TextView) view.findViewById(R.id.textviewLat_Map);
         textViewLon = (TextView) view.findViewById(R.id.textviewLon_Map);
         textViewAddress = (TextView) view.findViewById(R.id.textviewlocation_Maps);
+        textViewAddress.setSelected(true);
         textViewDirection = (TextView) view.findViewById(R.id.textviewDirection_Map);
         imageViewZomin = (ImageView) view.findViewById(R.id.imageviewZomin_Map);
         imageViewZomout = (ImageView) view.findViewById(R.id.imageviewZomout_Map);
@@ -125,44 +127,32 @@ public class FragmentMaps extends Fragment implements OnMapReadyCallback,
         imageViewLocation.setOnClickListener(this);
         imageViewShare.setOnClickListener(this);
         listmode = new ArrayList<>();
-
         listmode.add(GoogleMap.MAP_TYPE_SATELLITE);
         listmode.add(GoogleMap.MAP_TYPE_HYBRID);
         listmode.add(GoogleMap.MAP_TYPE_NORMAL);
         listmode.add(GoogleMap.MAP_TYPE_TERRAIN);
-
         globalApplication = (GlobalApplication) getActivity().getApplicationContext();
-
         horizontalWheelView = (HorizontalWheelView) view.findViewById(R.id.hw);
-
         horizontalWheelView.setMarksCount(50);
         horizontalWheelView.setShowActiveRange(true);
-
-        sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
-        initSensor();
-
-
-
-    }
-
-    private void initSensor() {
-        sensorMagtic = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-        sensorAcclerometor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-
+        compass = new Compass(getActivity());
+        Compass.CompassListener cl = getCompassListener();
+        compass.setListener(cl);
+        sotwFormatter = new SOTWFormatter(getActivity());
     }
 
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(1000);
+        mLocationRequest.setInterval(10000);
         mLocationRequest.setFastestInterval(1000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-        if (ContextCompat.checkSelfPermission(getActivity(),
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-        }
+//        if (ContextCompat.checkSelfPermission(getActivity(),
+//                Manifest.permission.ACCESS_FINE_LOCATION)
+//                == PackageManager.PERMISSION_GRANTED) {
+//            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+//        }
 
     }
 
@@ -179,15 +169,10 @@ public class FragmentMaps extends Fragment implements OnMapReadyCallback,
 
     @Override
     public void onLocationChanged(Location location) {
+        Log.d("1234", "onLocationChanged: " + Math.random());
 
         if (location != null) {
-
-            if (MapUtils.getCompleteAddressString(getActivity(), location.getLatitude(), location.getLongitude()).length() >= 0) {
-                textViewAddress.setText(MapUtils.getCompleteAddressString(getActivity(), location.getLatitude(), location.getLongitude()));
-
-            }
             globalApplication.location = location;
-
         }
 
     }
@@ -218,26 +203,16 @@ public class FragmentMaps extends Fragment implements OnMapReadyCallback,
 
         }
 
-        map.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
-            @RequiresApi(api = Build.VERSION_CODES.M)
+        map.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
             @Override
-            public void onCameraMove() {
+            public void onCameraIdle() {
                 center = map.getCameraPosition().target;
                 lat = center.latitude;
                 lon = center.longitude;
-
-                string_lat = NumderUltils.getFormattedLattitudeInDegree(lat);
-                string_lon = NumderUltils.getFormattedLongtitudeInDegree(lon);
-                textViewLatCenter.setText((int) (lat) + "°" + Math.round((lat - (int) (lat)) * 60));
-                textViewLonCenter.setText((int) (lon) + "°" + Math.round((lon - (int) (lon)) * 60));
-                textViewLatCenterDegree.setText(string_lat);
-                textViewLonCenterDegree.setText(string_lon);
-                textViewLat.setText(string_lat);
-                textViewLon.setText(string_lon);
-
-
+                getAddressCenterPoint(lat, lon);
             }
         });
+
 
         googleMap.setMyLocationEnabled(true);
         googleMap.getUiSettings().setMyLocationButtonEnabled(false);
@@ -254,9 +229,26 @@ public class FragmentMaps extends Fragment implements OnMapReadyCallback,
 
 
         }
+        ZoomtoMyLocation(globalApplication.location);
+        getAddressCenterPoint(globalApplication.location.getLatitude(), globalApplication.location.getLongitude());
 
 
     }
+
+    private void getAddressCenterPoint(double lat, double lon) {
+
+
+        string_lat = NumderUltils.getFormattedLattitudeInDegree(lat);
+        string_lon = NumderUltils.getFormattedLongtitudeInDegree(lon);
+        textViewLatCenter.setText((int) (lat) + "°" + Math.round((lat - (int) (lat)) * 60));
+        textViewLonCenter.setText((int) (lon) + "°" + Math.round((lon - (int) (lon)) * 60));
+        textViewLatCenterDegree.setText(string_lat);
+        textViewLonCenterDegree.setText(string_lon);
+        textViewLat.setText(string_lat);
+        textViewLon.setText(string_lon);
+        textViewAddress.setText(MapUtils.getCompleteAddressString(getActivity(), lat, lon));
+    }
+
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -294,6 +286,7 @@ public class FragmentMaps extends Fragment implements OnMapReadyCallback,
             case R.id.imageviewMyLocation_Map:
                 if (globalApplication.location != null) {
                     ZoomtoMyLocation(globalApplication.location);
+                    getAddressCenterPoint(globalApplication.location.getLatitude(), globalApplication.location.getLongitude());
 
                 }
 
@@ -333,68 +326,29 @@ public class FragmentMaps extends Fragment implements OnMapReadyCallback,
 
 
     @Override
-    public void onSensorChanged(SensorEvent event) {
+    public void onStart() {
+        compass.start();
+        super.onStart();
 
-
-        if (event.sensor.getType() == Sensor
-                .TYPE_ACCELEROMETER) {
-            mGravity = event.values;
-
-
-        }
-        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-            float axisX = event.values[0];
-            float axisY = event.values[1];
-            float axisZ = event.values[2];
-            float mgs = (float) Math.sqrt(axisX * axisX + axisY * axisY + axisZ * axisZ);
-            mGeomagnetic = event.values;
-
-
-        }
-        if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
-
-
-        }
-        if (mGravity != null && mGeomagnetic != null) {
-            float R[] = new float[9];
-            float I[] = new float[9];
-
-            if (SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic)) {
-
-                // orientation contains azimut, pitch and roll
-                float orientation[] = new float[3];
-                SensorManager.getOrientation(R, orientation);
-
-                float azimut = orientation[0];
-
-                float rotation = Math.round(-azimut * 360 / (2 * 3.14159f));
-                float degree = Math.round((float) (Math.toDegrees(azimut) + 360) % 360);
-
-                horizontalWheelView.setDegreesAngle(degree);
-                textViewDirection.setText((int) (degree) + NumderUltils.getsymbolDirection(degree));
-            }
-
-        }
     }
 
     @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    public void onStop() {
+        super.onStop();
 
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor
-                .TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_GAME);
-        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor
-                .TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_GAME);
+        compass.start();
+
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        sensorManager.unregisterListener(this);
+
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -431,7 +385,7 @@ public class FragmentMaps extends Fragment implements OnMapReadyCallback,
 
 
             } else {
-                // No explanation needed, we can request the permission.
+
                 ActivityCompat.requestPermissions(getActivity(),
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         MY_PERMISSIONS_REQUEST_LOCATION);
@@ -439,6 +393,39 @@ public class FragmentMaps extends Fragment implements OnMapReadyCallback,
         }
     }
 
+    private Compass.CompassListener getCompassListener() {
+        return new Compass.CompassListener() {
+            @Override
+            public void onNewAzimuth(final float azimuth) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        adjustArrow(azimuth);
+
+                    }
+                });
+            }
+
+            @Override
+            public void onNewMagnetic(float magnetic) {
+
+            }
+        };
+    }
+
+    private void adjustArrow(float azimuth) {
+        Animation an = new RotateAnimation(-currentAzimuth, -azimuth,
+                Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF,
+                0.5f);
+        currentAzimuth = azimuth;
+
+        an.setDuration(1);
+        an.setRepeatCount(0);
+        an.setFillAfter(true);
+        horizontalWheelView.setDegreesAngle(azimuth);
+        textViewDirection.setText((int) (azimuth) + NumderUltils.getsymbolDirection(azimuth));
+
+    }
 
 
 }

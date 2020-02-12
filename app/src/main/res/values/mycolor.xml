@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="mblack">#000000</color>
+    <color name="mblacktrans1">#B0000000</color>
     <color name="mwhite">#FFFFFF</color>
     <color name="mtext1">#FFFFFF</color>
     <color name="mgreen">#30F00B</color>

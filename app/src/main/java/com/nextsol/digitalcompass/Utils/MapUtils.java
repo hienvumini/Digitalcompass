@@ -10,12 +10,13 @@ import java.util.Locale;
 public class MapUtils {
 
     public static String getCompleteAddressString(Context context,double LATITUDE, double LONGITUDE) {
+        Address returnedAddress=new Address(Locale.US);
         String strAdd = "";
         Geocoder geocoder = new Geocoder(context, Locale.getDefault());
         try {
             List<Address> addresses = geocoder.getFromLocation(LATITUDE, LONGITUDE, 1);
             if (addresses != null) {
-                Address returnedAddress = addresses.get(0);
+                 returnedAddress = addresses.get(0);
                 StringBuilder strReturnedAddress = new StringBuilder("");
 
                 for (int i = 0; i <= returnedAddress.getMaxAddressLineIndex(); i++) {
@@ -31,5 +32,6 @@ public class MapUtils {
 
         }
         return strAdd;
+
     }
 }

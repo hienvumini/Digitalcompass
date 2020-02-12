@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -35,13 +36,14 @@ import com.nextsol.digitalcompass.R;
 import com.nextsol.digitalcompass.Utils.FragmentUtils;
 
 import com.nextsol.digitalcompass.fragment.FragmentCompass;
+import com.nextsol.digitalcompass.fragment.FragmentCompass1;
 import com.nextsol.digitalcompass.fragment.FragmentFlashlight;
 import com.nextsol.digitalcompass.fragment.FragmentForeCast;
 import com.nextsol.digitalcompass.fragment.FragmentMaps;
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
     BottomNavigationView bottomNavigationView;
-    FragmentCompass fragmentCompass;
+    FragmentCompass1 fragmentCompass;
     FragmentFlashlight fragmentFlashlight;
     FragmentForeCast fragmentForeCast;
     FragmentMaps fragmentMaps;
@@ -98,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void init() {
         bottomNavigationView = (BottomNavigationView) findViewById(R.id.ctNavigationbotton);
-        fragmentCompass = new FragmentCompass();
+        fragmentCompass = new FragmentCompass1();
         fragmentFlashlight = new FragmentFlashlight();
         fragmentForeCast = new FragmentForeCast();
 
@@ -217,6 +219,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     @Override
     public void onLocationChanged(Location location) {
+        Log.d("1234", "onLocationChanged: "+Math.random());
         getLastLocation();
 
     }
