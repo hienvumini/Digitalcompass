@@ -2,8 +2,10 @@ package com.nextsol.digitalcompass.fragment;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
@@ -79,6 +81,7 @@ public class FragmentMaps extends Fragment implements OnMapReadyCallback,
 
     private float currentAzimuth;
     private SOTWFormatter sotwFormatter;
+    SharedPreferences sharedPreferences;
 
 
     @Override
@@ -139,6 +142,7 @@ public class FragmentMaps extends Fragment implements OnMapReadyCallback,
         Compass.CompassListener cl = getCompassListener();
         compass.setListener(cl);
         sotwFormatter = new SOTWFormatter(getActivity());
+        sharedPreferences = getActivity().getSharedPreferences("location", Context.MODE_PRIVATE);
     }
 
 
@@ -180,7 +184,6 @@ public class FragmentMaps extends Fragment implements OnMapReadyCallback,
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onMapReady(GoogleMap googleMap) {
-
 
         map = googleMap;
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
